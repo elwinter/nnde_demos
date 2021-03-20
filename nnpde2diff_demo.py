@@ -24,7 +24,7 @@ H = 5
 # Create training data.
 nx = 5
 nt = 5
-xt_train = np.array(create_training_grid([nx, nt]))
+x_train = np.array(create_training_grid([nx, nt]))
 if training_opts['debug']:
     print('The training points are:\n', x_train)
 
@@ -41,8 +41,7 @@ for pde in ("nnde.differentialequation.examples.diff1d_halfsine",):
     if training_opts['debug']:
         print("Differential equation %s has %d dimensions." % (eq, m))
 
-    # Select the appropriate training set.
-    x_train = xt_train
+    # Compute the number of training points.
     n = len(x_train)
 
     # Analytical solution (if available)
