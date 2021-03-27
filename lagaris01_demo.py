@@ -17,7 +17,7 @@ training_opts['verbose'] = True
 training_opts['maxepochs'] = 1000
 
 # Set to True to use LaTex rendering.
-use_latex = True
+use_latex = False
 
 # Width and height of a figure (a standard 8.5x11 inch page)
 FIGURE_WIDTH_INCHES = 8.5
