@@ -1,14 +1,16 @@
 """Demonstration of use of nnde to solve ODE IVP"""
 
-
-import matplotlib
-import matplotlib.pyplot as plt
+import os
 import numpy as np
 
 from nnde.differentialequation.ode.ode1ivp import ODE1IVP
 from nnde.math.trainingdata import create_training_grid
 from nnde.neuralnetwork.nnode1ivp import NNODE1IVP
 
+out_dir, _ = os.path.split(__file__)
+out_dir = os.path.join(out_dir, 'lagaris01_demo')
+if not os.path.exists(out_dir):
+    os.mkdir(out_dir)
 
 # Options for training
 training_opts = {}
@@ -26,7 +28,7 @@ FIGURE_HEIGHT_INCHES = 11
 # Create training data.
 nx = 11
 x_train = np.array(create_training_grid(nx))
-np.savetxt('training_points.dat', x_train)
+np.savetxt(os.path.join(out_dir,'training_points.dat'), x_train)
 if training_opts['debug']:
     print('The training points are:\n', x_train)
 
@@ -43,7 +45,7 @@ if ode1ivp.Ya:
     Ya = np.zeros(nx)
     for i in range(nx):
         Ya[i] = ode1ivp.Ya(x_train[i])
-    np.savetxt('Ya.dat', Ya)
+    np.savetxt(os.path.join(out_dir,'Ya.dat'), Ya)
     if training_opts['debug']:
         print('The analytical solution at the training points is:')
         print(Ya)
@@ -51,7 +53,7 @@ if ode1ivp.dYa_dx:
     dYa_dx = np.zeros(nx)
     for i in range(nx):
         dYa_dx[i] = ode1ivp.dYa_dx(x_train[i])
-    np.savetxt('dYa_dx.dat', dYa_dx)
+    np.savetxt(os.path.join(out_dir,'dYa_dx.dat'), dYa_dx)
     if training_opts['debug']:
         print('The analytical derivative at the training points is:')
         print(dYa_dx)
@@ -84,13 +86,13 @@ if training_opts['debug']:
     print(net)
 
 # Save the parameter history.
-np.savetxt('phist.dat', net.phist)
+np.savetxt(os.path.join(out_dir, 'phist.dat'), net.phist)
 
 # Run the trained network to generate the trained solution.
 Yt = net.run(x_train)
-np.savetxt('Yt.dat', Yt)
+np.savetxt(os.path.join(out_dir, 'Yt.dat'), Yt)
 dYt_dx = net.run_derivative(x_train)
-np.savetxt('dYt_dx.dat', dYt_dx)
+np.savetxt(os.path.join(out_dir, 'dYt_dx.dat'), dYt_dx)
 if training_opts['debug']:
     print('The trained solution is:')
     print('Yt =', Yt)
@@ -100,45 +102,61 @@ if training_opts['debug']:
 # (Optional) Error in solution and derivative
 if ode1ivp.Ya:
     Y_err = Yt - Ya
-    np.savetxt('Y_err.dat', Y_err)
+    np.savetxt(os.path.join(out_dir, 'Y_err.dat'), Y_err)
     if training_opts['debug']:
         print('The error in the trained solution is:')
         print(Y_err)
 if ode1ivp.dYa_dx:
     dY_dx_err = dYt_dx - dYa_dx
-    np.savetxt('dY_dx_err.dat', dY_dx_err)
+    np.savetxt(os.path.join(out_dir, 'dY_dx_err.dat'), dY_dx_err)
     if training_opts['debug']:
         print('The error in the trained derivative is:')
         print(dY_dx_err)
 
 # Plot the results.
 
-# Use LaTex for equation rendering.
-if use_latex:
-    plt.rcParams.update({
-        'text.usetex': True
-    })
+# Set to True to use LaTex rendering.
+use_latex = True
 
+# Width and height of a figure (a standard 8.5x11 inch page)
+FIGURE_WIDTH_INCHES = 8.5
+FIGURE_HEIGHT_INCHES = 11
+
+use_latex = True
+
+try:
+    import matplotlib.pyplot as plt
+except:
+    print("Matplotlib not found. Not plotting results.")
+
+if use_latex:
+    try:
+        import matplotlib
+        use_latex = matplotlib.checkdep_usetex(use_latex)
+    except:
+        pass
+
+plt.rcParams.update({'text.usetex': use_latex})
 
 # Load the training data.
-x_train = np.loadtxt('training_points.dat')
+x_train = np.loadtxt(os.path.join(out_dir, 'training_points.dat'))
 
 # N.B. RESULT FILES USE COLUMN ORDER (x y t).
 
 # Load the analytical results.
-Ya = np.loadtxt('Ya.dat')
-dYa_dx = np.loadtxt('dYa_dx.dat')
+Ya = np.loadtxt(os.path.join(out_dir, 'Ya.dat'))
+dYa_dx = np.loadtxt(os.path.join(out_dir, 'dYa_dx.dat'))
 
 # Load the trained results.
-Yt = np.loadtxt('Yt.dat')
-dYt_dx = np.loadtxt('dYt_dx.dat')
+Yt = np.loadtxt(os.path.join(out_dir, 'Yt.dat'))
+dYt_dx = np.loadtxt(os.path.join(out_dir, 'dYt_dx.dat'))
 
 # Load the errors in the trained results.
-Y_err = np.loadtxt('Y_err.dat')
-dY_dx_err = np.loadtxt('dY_dx_err.dat')
+Y_err = np.loadtxt(os.path.join(out_dir, 'Y_err.dat'))
+dY_dx_err = np.loadtxt(os.path.join(out_dir, 'dY_dx_err.dat'))
 
 # Load the network parameter history.
-phist = np.loadtxt('phist.dat')
+phist = np.loadtxt(os.path.join(out_dir, 'phist.dat'))
 
 # Create plots in a buffer for writing to a file.
 matplotlib.use('Agg')
@@ -171,8 +189,7 @@ plt.xlabel('x')
 plt.grid()
 
 # Save the figure.
-plt.savefig('Y_ate.png')
-plt.close()
+plt.savefig(os.path.join(out_dir, 'Y_ate.png'))
 
 # Create the figure to hold the parameter history plots.
 fig, axes = plt.subplots(
@@ -210,4 +227,4 @@ plt.ylabel('$v_k$')
 plt.legend(bbox_to_anchor=(1.07, 0.5), loc='center')
 
 # Save the parameter history figure.
-plt.savefig('phist.png')
+plt.savefig(os.path.join(out_dir, 'lagaris01_demo.png'))
