@@ -4,7 +4,7 @@ Demonstration code for the [`nnde` package](https://github.com/elwinter/nnde)
 
 # Install
 ```
-pip install nnde --upgrade.
+pip install nnde --upgrade
 git clone https://github.com/elwinter/nnde_demos
 ```
 
