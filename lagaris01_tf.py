@@ -1,8 +1,6 @@
 # Import standard Python modules.
 import datetime
 import importlib
-# import logging
-# from math import exp
 import platform
 import sys
 import numpy as np
@@ -48,14 +46,6 @@ def build_model(H, wmin, wmax, umin, umax, vmin, vmax):
     )
     model = tf.keras.Sequential([hidden_layer, output_layer])
     return model
-
-
-# def train_epoch():
-#     pass
-
-
-# def compute_loss():
-#     pass
 
 
 if __name__ == '__main__':
