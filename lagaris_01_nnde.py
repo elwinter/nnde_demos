@@ -65,7 +65,7 @@ if __name__ == '__main__':
 
     # Options for training.
     training_opts = {}
-    training_opts['debug'] = True
+    training_opts['debug'] = False
     training_opts['eta'] = learning_rate
     training_opts['maxepochs'] = n_epochs
     training_opts['verbose'] = True

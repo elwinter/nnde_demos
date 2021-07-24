@@ -133,7 +133,7 @@ if __name__ == '__main__':
     t_start = datetime.datetime.now()
     print("Training started at", t_start)
     for epoch in range(n_epochs):
-        print("Starting epoch %s." % epoch)
+        # print("Starting epoch %s." % epoch)
 
         # Run the forward pass.
         with tf.GradientTape() as tape2:
