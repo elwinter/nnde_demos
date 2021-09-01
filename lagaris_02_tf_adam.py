@@ -1,4 +1,4 @@
-"""Demonstration of use of TensorFlow to solve the lagaris01 ODE IVP."""
+"""Demonstration of use of TensorFlow to solve the lagaris02 ODE IVP."""
 
 
 import datetime
@@ -40,37 +40,14 @@ def create_training_data(nt):
     return x_train
 
 
-# <HACK>
-
-# Create a set of custom initializers so that the starting TensorFlow
-# state is the same as for nnde.
-
-# w0 = tf.convert_to_tensor(np.array((0.09762701, 0.43037873, 0.20552675, 0.08976637, -0.1526904, 0.29178823, -0.12482558, 0.783546, 0.92732552, -0.23311696)).reshape((1, 10)), dtype='float32')
-# u0 = tf.convert_to_tensor(np.array((0.58345008, 0.05778984, 0.13608912, 0.85119328, -0.85792788, -0.8257414, -0.95956321, 0.66523969, 0.5563135, 0.7400243)).reshape((10,)), dtype='float32')
-# v0 = tf.convert_to_tensor(np.array((0.95723668, 0.59831713, -0.07704128, 0.56105835, -0.76345115, 0.27984204, -0.71329343, 0.88933783, 0.04369664, -0.17067612)).reshape((10, 1)), dtype='float32')
-
-# def w_init(shape, dtype=None):
-#     return w0
-
-# def u_init(shape, dtype=None):
-#     return u0
-
-# def v_init(shape, dtype=None):
-#     return v0
-# </HACK>
-
-
 def build_model(H):
     hidden_layer = tf.keras.layers.Dense(
         units=H, use_bias=True,
         activation=tf.keras.activations.sigmoid,
-        # kernel_initializer=w_init,
-        # bias_initializer=u_init
     )
     output_layer = tf.keras.layers.Dense(
         units=1,
         activation=tf.keras.activations.linear,
-        # kernel_initializer=v_init,
         use_bias=False,
     )
     model = tf.keras.Sequential([hidden_layer, output_layer])
@@ -80,7 +57,7 @@ def build_model(H):
 if __name__ == '__main__':
 
     # Specify the equation to solve.
-    eq_module = 'nnde.differentialequation.examples.lagaris_01'
+    eq_module = 'nnde.differentialequation.examples.lagaris_02'
     eq_name = eq_module.split('.')[-1]
 
     # Specify the training algorithm.
@@ -127,6 +104,9 @@ if __name__ == '__main__':
     # Rename the training Variable for convenience.
     x = xtv
 
+    # Create the optimizer.
+    optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
+
     # Train the model.
     print("Hyperparameters: nt = %s, H = %s, n_epochs = %s, learning_rate = %s"
           % (nt, H, n_epochs, learning_rate))
@@ -142,15 +122,15 @@ if __name__ == '__main__':
                 # Compute the network output.
                 N = model(x)
 
-                # Compute the trial solution.
-                y = 1 + x*N
+                # Compute trial solution.
+                y = x*N
 
             # Compute the gradient of trial solution the network output wrt
             # the inputs.
             dy_dx = tape1.gradient(y, x)
 
             # Compute the estimate of the differential equation.
-            G = dy_dx + (x + (1 + 3*x**2)/(1 + x + x**3))*y - x**3 - 2*x - x**2*(1 + 3*x**2)/(1 + x + x**3)
+            G = dy_dx + y/5 - tf.math.exp(-x/5)*tf.math.cos(x)
 
             # Compute the loss function.
             L = tf.reduce_sum(G**2)
@@ -190,7 +170,7 @@ if __name__ == '__main__':
     dN_dx = tape.gradient(N, xtv)
     N = tf.reshape(N, (nt, 1))
     dN_dx = tf.reshape(dN_dx, (nt, 1))
-    Yt = 1 + xtv*N
+    Yt = xtv*N
     np.savetxt(os.path.join(output_dir, 'Yt.dat'), Yt.numpy().reshape((nt)))
     dYt_dx = xtv*dN_dx + N
     np.savetxt(os.path.join(output_dir, 'dYt_dx.dat'), dYt_dx.numpy().reshape((nt)))

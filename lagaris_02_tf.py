@@ -142,14 +142,15 @@ if __name__ == '__main__':
                 # Compute the network output.
                 N = model(x)
 
-            # Compute the gradient of the network output wrt the inputs.
-            dN_dx = tape1.gradient(N, x)
+                # Compute trial solution.
+                y = x*N
 
-            # Compute the estimate of the solution to the differential equation.
-            y = x*N
+            # Compute the gradient of trial solution the network output wrt
+            # the inputs.
+            dy_dx = tape1.gradient(y, x)
 
             # Compute the estimate of the differential equation.
-            G = x*dN_dx + N + y/5 - tf.math.exp(-x/5)*tf.math.cos(x)
+            G = dy_dx + y/5 - tf.math.exp(-x/5)*tf.math.cos(x)
 
             # Compute the loss function.
             L = tf.reduce_sum(G**2)
