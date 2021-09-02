@@ -111,6 +111,9 @@ if __name__ == '__main__':
     # Rename the training Variable for convenience.
     x = xtv
 
+    # Create the optimizer.
+    optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
+
     # Train the model.
     print("Hyperparameters: nt = %s, H = %s, n_epochs = %s, learning_rate = %s"
           % (nt, H, n_epochs, learning_rate))
@@ -159,8 +162,7 @@ if __name__ == '__main__':
         )
 
         # Update the parameters for this pass.
-        for (v, d) in zip(model.trainable_variables, grad):
-            v.assign_sub(learning_rate*d)
+        optimizer.apply_gradients(zip(grad, model.trainable_variables))
     
         print("Ending epoch %s." % epoch)
 
